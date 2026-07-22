@@ -2,18 +2,19 @@
 
 Usage:  python gen_banner.py OUT.png [AVATAR.png]
 
-Palette (matches README design system):
-  bg #0D1117 | cyan #22D3EE | purple #A855F7 | grey #8B949E
+Palette (matches README design system) - ORANGE / BLACK:
+  bg #0A0A0A | orange #FF7A00 | amber #FFB800 | ember #E23C00 | grey #919196
 """
 import sys
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 W, H = 2400, 540
-BG = (13, 17, 23)
-CYAN = (34, 211, 238)
-PURPLE = (168, 85, 247)
-GREY = (139, 148, 158)
-WHITE = (236, 242, 248)
+BG = (10, 10, 10)
+ORANGE = (255, 122, 0)
+AMBER = (255, 184, 0)
+EMBER = (226, 60, 0)
+GREY = (145, 145, 150)
+WHITE = (247, 244, 240)
 
 
 def font(names, size):
@@ -68,16 +69,14 @@ def gradient_bar(w, h, c1, c2):
 
 
 def circular_avatar(path, size=340, ring=16):
-    """Avatar cropped to a circle with a cyan->purple gradient ring + outer glow."""
-    box = size + ring * 2 + 60  # padding for glow
+    """Avatar cropped to a circle with an orange->amber gradient ring + glow."""
+    box = size + ring * 2 + 60
     av = Image.open(path).convert("RGB")
     side = min(av.size)
     av = av.crop(((av.width - side) // 2, (av.height - side) // 2,
                   (av.width + side) // 2, (av.height + side) // 2)).resize((size, size), Image.LANCZOS)
 
-    # gradient ring drawn as arc segments.
-    # triangle-wave interpolation (cyan -> purple -> cyan) so the ends meet
-    # seamlessly instead of leaving a hard join at the top.
+    # triangle-wave interpolation so the gradient ends meet seamlessly
     ring_img = Image.new("RGB", (box, box), (0, 0, 0))
     rd = ImageDraw.Draw(ring_img)
     o = 30
@@ -85,14 +84,14 @@ def circular_avatar(path, size=340, ring=16):
     for i in range(segs):
         f = i / segs
         t = 1 - abs(2 * f - 1)
-        col = tuple(int(CYAN[k] * (1 - t) + PURPLE[k] * t) for k in range(3))
+        col = tuple(int(ORANGE[k] * (1 - t) + AMBER[k] * t) for k in range(3))
         rd.arc([o, o, box - o, box - o], start=-90 + f * 360,
                end=-90 + (f + 1) / segs * 360 + 1.5, fill=col, width=ring)
 
     glow = ring_img.filter(ImageFilter.GaussianBlur(24))
 
     # ring + glow are additive light; the avatar itself must NOT be, or its
-    # colours blow out. Return them separately so build() can composite right.
+    # colours blow out. Returned separately so build() composites correctly.
     light = ImageChops.add(glow, ring_img)
     mask = Image.new("L", (size, size), 0)
     ImageDraw.Draw(mask).ellipse([0, 0, size - 1, size - 1], fill=255)
@@ -102,16 +101,16 @@ def circular_avatar(path, size=340, ring=16):
 def build(out_path, avatar_path=None):
     img = Image.new("RGB", (W, H), BG)
 
-    # ambient neon lighting -------------------------------------------------
-    img = ImageChops.add(img, glow_blob(int(W * 0.22), int(H * 0.45), 900, CYAN, 0.42))
-    img = ImageChops.add(img, glow_blob(int(W * 0.80), int(H * 0.55), 900, PURPLE, 0.38))
+    # ambient warm lighting -------------------------------------------------
+    img = ImageChops.add(img, glow_blob(int(W * 0.22), int(H * 0.45), 900, ORANGE, 0.40))
+    img = ImageChops.add(img, glow_blob(int(W * 0.80), int(H * 0.55), 900, EMBER, 0.36))
 
     # subtle dot grid -------------------------------------------------------
     dots = Image.new("RGB", (W, H), (0, 0, 0))
     dd = ImageDraw.Draw(dots)
     for y in range(0, H, 40):
         for x in range(0, W, 40):
-            dd.ellipse([x, y, x + 2, y + 2], fill=(30, 36, 46))
+            dd.ellipse([x, y, x + 2, y + 2], fill=(38, 30, 24))
     img = ImageChops.add(img, dots)
 
     # avatar ----------------------------------------------------------------
@@ -119,9 +118,7 @@ def build(out_path, avatar_path=None):
     if avatar_path:
         light, av, av_mask, box, inner = circular_avatar(avatar_path)
         ax, ay = 250, (H - box) // 2
-        # 1. ring + glow composited as light
         img.paste(ImageChops.add(img.crop((ax, ay, ax + box, ay + box)), light), (ax, ay))
-        # 2. avatar pasted normally so its colours stay true
         img.paste(av, (ax + inner, ay + inner), av_mask)
         text_cx = (ax + box + W - 160) // 2
 
@@ -132,7 +129,7 @@ def build(out_path, avatar_path=None):
     sub_y = H // 2 + 56
 
     halo = Image.new("RGB", (W, H), (0, 0, 0))
-    tracked_text(ImageDraw.Draw(halo), (text_cx, name_y), "AYUSH GUPTA", name_f, CYAN, 10, center=True)
+    tracked_text(ImageDraw.Draw(halo), (text_cx, name_y), "AYUSH GUPTA", name_f, ORANGE, 10, center=True)
     img = ImageChops.add(img, halo.filter(ImageFilter.GaussianBlur(30)))
 
     d = ImageDraw.Draw(img)
@@ -141,7 +138,7 @@ def build(out_path, avatar_path=None):
 
     # gradient accent underline ---------------------------------------------
     bw, bh = 340, 7
-    img.paste(gradient_bar(bw, bh, CYAN, PURPLE), (text_cx - bw // 2, sub_y + 92))
+    img.paste(gradient_bar(bw, bh, ORANGE, AMBER), (text_cx - bw // 2, sub_y + 92))
 
     img.save(out_path, "PNG", optimize=True)
     print("wrote", out_path, img.size)
