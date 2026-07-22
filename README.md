@@ -15,7 +15,7 @@
 
 <div align="center">
 
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:22D3EE,100:A855F7&height=160&section=header&text=Ayush%20Gupta&fontSize=52&fontColor=ffffff&fontAlignY=34&animation=fadeIn" alt="" />
+<img width="100%" src="https://raw.githubusercontent.com/Ayush-Gupta-0212/Ayush-Gupta-0212/main/assets/banner.png" alt="Ayush Gupta — CS student and full-stack developer" />
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=500&size=20&pause=1200&color=22D3EE&center=true&vCenter=true&width=520&height=40&lines=MERN+stack+developer;CS+student+building+for+the+web;Currently%3A+DSA+in+C%2B%2B+%26+Docker" alt="MERN stack developer" />
 
@@ -120,4 +120,4 @@ A fullstack modern farming solution website.
 
 </div>
 
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=0:A855F7,100:22D3EE&height=100&section=footer" alt="" />
+<img width="100%" src="https://raw.githubusercontent.com/Ayush-Gupta-0212/Ayush-Gupta-0212/main/assets/divider.png" alt="" />
